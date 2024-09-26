@@ -33,7 +33,3 @@ def search(text, pattern):
     return positions
 
 
-text = "abcabcaabcab"
-pattern = "abc"
-positions = search(text, pattern)
-print(f"Pattern found at positions: {positions}")

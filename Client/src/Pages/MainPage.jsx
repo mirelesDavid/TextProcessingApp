@@ -7,14 +7,17 @@ const MainPage = () => {
   const [fileContent2, setFileContent2] = useState('');
   const [originalContent1, setOriginalContent1] = useState('');
   const [originalContent2, setOriginalContent2] = useState('');
+  const [pattern, setPattern] = useState('');
+  const [positions, setPositions] = useState([]);
+  const [currentPositionIndex, setCurrentPositionIndex] = useState(0);
 
   const handleFileUpload = (event, setFileContent, setOriginalContent) => {
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = function(e) {
-        setFileContent(e.target.result); 
-        setOriginalContent(e.target.result); // Guarda el contenido original
+      reader.onload = function (e) {
+        setFileContent(e.target.result);
+        setOriginalContent(e.target.result);
       };
       reader.readAsText(file);
     }
@@ -23,8 +26,8 @@ const MainPage = () => {
   const highlightSubstring = (text, ranges) => {
     let highlightedText = '';
     let lastIndex = 0;
-    
-    ranges.forEach(({start, end}) => {
+
+    ranges.forEach(({ start, end }) => {
       highlightedText += text.slice(lastIndex, start);
       highlightedText += `<span class="highlight">${text.slice(start, end + 1)}</span>`;
       lastIndex = end + 1;
@@ -34,18 +37,44 @@ const MainPage = () => {
     return highlightedText;
   };
 
-  const highlightPalindrome = (text, startIndex, endIndex) => {
-    const beforePalindrome = text.slice(0, startIndex);
-    const palindrome = text.slice(startIndex, endIndex + 1);
-    const afterPalindrome = text.slice(endIndex + 1);
-    return `${beforePalindrome}<span class="highlight">${palindrome}</span>${afterPalindrome}`;
+  const runZAlgorithm = async () => {
+    try {
+      const response = await axiosInstance.post('/zAlgorithm', { text: fileContent1, pattern });
+      const { positions } = response.data;
+      setPositions(positions);
+      setCurrentPositionIndex(0);
+      if (positions.length > 0) {
+        const highlightedText = highlightSubstring(fileContent1, [{ start: positions[0], end: positions[0] + pattern.length - 1 }]);
+        setFileContent1(highlightedText);
+      }
+    } catch (error) {
+      console.error('Error running Z Algorithm:', error);
+    }
+  };
+
+  const nextMatch = () => {
+    if (positions.length > 0) {
+      const nextIndex = (currentPositionIndex + 1) % positions.length;
+      const highlightedText = highlightSubstring(originalContent1, [{ start: positions[nextIndex], end: positions[nextIndex] + pattern.length - 1 }]);
+      setFileContent1(highlightedText);
+      setCurrentPositionIndex(nextIndex);
+    }
+  };
+
+  const prevMatch = () => {
+    if (positions.length > 0) {
+      const prevIndex = (currentPositionIndex - 1 + positions.length) % positions.length;
+      const highlightedText = highlightSubstring(originalContent1, [{ start: positions[prevIndex], end: positions[prevIndex] + pattern.length - 1 }]);
+      setFileContent1(highlightedText);
+      setCurrentPositionIndex(prevIndex);
+    }
   };
 
   const runManacher = async () => {
     try {
       const response = await axiosInstance.post('/manacher', { text: fileContent1 });
       const { startIndex, endIndex } = response.data;
-      const highlightedText = highlightPalindrome(fileContent1, startIndex, endIndex);
+      const highlightedText = highlightSubstring(fileContent1, [{ start: startIndex, end: endIndex }]);
       setFileContent1(highlightedText);
     } catch (error) {
       console.error('Error running Manacher:', error);
@@ -57,20 +86,22 @@ const MainPage = () => {
       const response = await axiosInstance.post('/longestCommonSubString', { text1: fileContent1, text2: fileContent2 });
       const { substringCoordinates1, substringCoordinates2 } = response.data;
 
-      const highlightedText1 = highlightSubstring(fileContent1, substringCoordinates1);
-      const highlightedText2 = highlightSubstring(fileContent2, substringCoordinates2);
-
-      setFileContent1(highlightedText1);
-      setFileContent2(highlightedText2);
+      if (substringCoordinates1 && substringCoordinates2) {
+        const highlightedText1 = highlightSubstring(fileContent1, substringCoordinates1);
+        const highlightedText2 = highlightSubstring(fileContent2, substringCoordinates2);
+        
+        setFileContent1(highlightedText1);
+        setFileContent2(highlightedText2);
+      }
     } catch (error) {
       console.error('Error running Longest Common Substring:', error);
     }
   };
 
-  // Función para restablecer los textos originales
   const resetHighlight = () => {
-    setFileContent1(originalContent1); // Restablece el contenido original de fileContent1
-    setFileContent2(originalContent2); // Restablece el contenido original de fileContent2
+    setFileContent1(originalContent1);
+    setFileContent2(originalContent2);
+    setPositions([]);
   };
 
   return (
@@ -105,10 +136,25 @@ const MainPage = () => {
         </div>
       </div>
 
+      <div className="pattern-input-container">
+        <input
+          className="pattern-input"
+          type="text"
+          placeholder="Enter pattern to search"
+          value={pattern}
+          onChange={(e) => setPattern(e.target.value)}
+        />
+        <button onClick={runZAlgorithm}>Search Pattern (Z Algorithm)</button>
+      </div>
+
       <div className="button-container">
         <button onClick={runManacher}>Run Manacher</button>
-        <button onClick={runLongestCommonSubstring}>Run Longest Common Substring</button>
+        <button onClick={runLongestCommonSubstring} disabled={!fileContent1 || !fileContent2}>
+          Run Longest Common Substring
+        </button>
         <button onClick={resetHighlight}>Reset Highlight</button>
+        <button onClick={prevMatch} disabled={positions.length === 0}>Prev Match</button>
+        <button onClick={nextMatch} disabled={positions.length === 0}>Next Match</button>
       </div>
     </div>
   );

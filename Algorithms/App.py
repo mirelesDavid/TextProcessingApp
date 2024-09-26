@@ -1,8 +1,21 @@
 from flask import Flask, request, jsonify
 from manacherAlg import findLongestPalindrome
 from longestCommonSubStringAlg import getLongestCommonSubString
+from zAlg import search
 
 app = Flask(__name__)
+
+@app.route('/zAlg', methods=['POST'])
+def zAlg():
+    try:
+        data = request.get_json()
+        text = data.get('text', '')
+        pattern = data.get('pattern', '')
+        positions = search(text, pattern)
+
+        return jsonify({"positions": positions})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/manchesterAlg', methods=['POST'])
 def manchesterAlg():

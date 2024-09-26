@@ -16,6 +16,22 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static("public"));
 
+app.post("/zAlgorithm", async (req, res) => {
+    try {
+        const { text, pattern } = req.body;
+        console.log('Sending POST request to Flask API at http://127.0.0.1:5000/zAlg');
+
+        const flaskResponse = await axios.post('http://127.0.0.1:5000/zAlg', { text, pattern });
+
+        const { positions } = flaskResponse.data;
+
+        res.json({ positions });
+    } catch (error) {
+        console.error('Error in Flask request:', error.response ? error.response.status : error.message);
+        res.status(500).json({ message: 'Failed to get a response from Flask API' });
+    }
+});
+
 app.post("/manacher", async (req, res) => {
     try {
         const { text } = req.body;
