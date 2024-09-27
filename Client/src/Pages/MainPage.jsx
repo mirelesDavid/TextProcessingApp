@@ -10,16 +10,44 @@ const MainPage = () => {
   const [pattern, setPattern] = useState('');
   const [positions, setPositions] = useState([]);
   const [currentPositionIndex, setCurrentPositionIndex] = useState(0);
+  const [prefix, setPrefix] = useState('');  
+  const [suggestions, setSuggestions] = useState([]);  
 
   const handleFileUpload = (event, setFileContent, setOriginalContent) => {
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = function (e) {
-        setFileContent(e.target.result);
-        setOriginalContent(e.target.result);
+      reader.onload = async function (e) {
+        const content = e.target.result;
+        setFileContent(content);
+        setOriginalContent(content);
+
+        try {
+          await axiosInstance.post('/insertText', { text: content });
+          console.log("Words inserted into Trie");
+        } catch (error) {
+          console.error('Error inserting text:', error);
+        }
       };
       reader.readAsText(file);
+    }
+  };
+
+  const handlePrefixChange = async (e) => {
+    const newPrefix = e.target.value;
+    setPrefix(newPrefix);
+
+    if (newPrefix.trim() === '') {
+      setSuggestions([]);
+      return;
+    }
+
+    try {
+      const response = await axiosInstance.post('/trieAlgorithm', { prefix: newPrefix });
+      const { suggestions } = response.data;
+      setSuggestions(suggestions);
+    } catch (error) {
+      console.error('Error fetching suggestions:', error);
     }
   };
 
@@ -134,6 +162,23 @@ const MainPage = () => {
             onChange={(e) => handleFileUpload(e, setFileContent2, setOriginalContent2)}
           />
         </div>
+      </div>
+
+      <div className="prefix-search-container">
+        <input
+          className="pattern-input"
+          type="text"
+          placeholder="Start typing a prefix..."
+          value={prefix}
+          onChange={handlePrefixChange} 
+        />
+        {suggestions.length > 0 && (
+          <ul className="suggestions-list">
+            {suggestions.map((suggestion, index) => (
+              <li key={index}>{suggestion}</li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <div className="pattern-input-container">

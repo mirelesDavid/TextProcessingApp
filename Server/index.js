@@ -32,6 +32,30 @@ app.post("/zAlgorithm", async (req, res) => {
     }
 });
 
+
+app.post("/insertText", async (req, res) => {
+    try {
+        const { text } = req.body;
+        const flaskResponse = await axios.post('http://127.0.0.1:5000/insertText', { text });
+        res.json(flaskResponse.data);
+    } catch (error) {
+        console.error('Error inserting text in Trie:', error);
+        res.status(500).json({ message: 'Failed to insert text in Trie' });
+    }
+});
+
+app.post("/trieAlgorithm", async (req, res) => {
+    try {
+        const { prefix } = req.body;
+        const flaskResponse = await axios.post('http://127.0.0.1:5000/trieAlg', { prefix });
+        const { suggestions } = flaskResponse.data;
+        res.json({ suggestions });
+    } catch (error) {
+        console.error('Error in Flask request:', error);
+        res.status(500).json({ message: 'Failed to get a response from Flask API' });
+    }
+});
+
 app.post("/manacher", async (req, res) => {
     try {
         const { text } = req.body;

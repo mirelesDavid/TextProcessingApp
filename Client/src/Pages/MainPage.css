@@ -106,6 +106,32 @@ button:disabled {
     gap: 15px;
 }
 
+.prefix-search-container {
+    margin-top: 20px;
+    width: 350px;
+}
+
+.suggestions-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 10px 0;
+    border: 1px solid #3a3a3a;
+    border-radius: 12px;
+    background-color: #1c1c1c;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.suggestions-list li {
+    padding: 10px;
+    cursor: pointer;
+    color: #d3d3d3;
+}
+
+.suggestions-list li:hover {
+    background-color: #2b2b2b;
+}
+
 .highlight {
     background-color: #949393;
     color: #0e0e0e;
