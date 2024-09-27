@@ -35,9 +35,4 @@ class Trie:
         for char, child in node.children.items():
             self._findWordsFromNode(child, prefix + char)
 
-trie = Trie()
-trie.insert("guillermo")
-trie.insert("guiso")
-trie.insert("guille")
 
-print(trie.startsWith("gui"))  

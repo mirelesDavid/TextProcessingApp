@@ -1,5 +1,7 @@
-def findLongestPalindrome(inputString):
-    processedString = '#' + '#'.join(inputString) + '#'
+def findLongestPalindromeWithMapping(inputString):
+    normalizedString, indexMapping = preprocessTextWithMapping(inputString)
+
+    processedString = '#' + '#'.join(normalizedString) + '#'
     length = len(processedString)
     palindromeLengths = [0] * length
     center = 0
@@ -27,4 +29,20 @@ def findLongestPalindrome(inputString):
 
     startIndex = (centerIndex - maxLength) // 2
     endIndex = startIndex + maxLength - 1
-    return startIndex, endIndex
+
+    originalStartIndex = indexMapping[startIndex]
+    originalEndIndex = indexMapping[endIndex]
+
+    return originalStartIndex, originalEndIndex
+
+
+def preprocessTextWithMapping(inputString):
+    normalizedString = ''
+    indexMapping = []
+
+    for i, char in enumerate(inputString):
+        if char.isalnum():
+            normalizedString += char.lower()
+            indexMapping.append(i)
+
+    return normalizedString, indexMapping

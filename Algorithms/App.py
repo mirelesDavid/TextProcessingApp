@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from manacherAlg import findLongestPalindrome
+from manacherAlg import findLongestPalindromeWithMapping
 from longestCommonSubStringAlg import getLongestCommonSubString
 from zAlg import search
 from trieAlg import Trie
@@ -50,16 +50,17 @@ def trie_alg():
 
 #MANACHER
 @app.route('/manchesterAlg', methods=['POST'])
-def manchesterAlg():
+def manchester_alg():
     try:
         data = request.get_json()
         text = data.get('text', '')
 
-        startIndex, endIndex = findLongestPalindrome(text)
+        start_index, end_index = findLongestPalindromeWithMapping(text)
 
-        return jsonify({"startIndex": startIndex, "endIndex": endIndex})
+        return jsonify({"startIndex": start_index, "endIndex": end_index})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 #LONGEST COMMON SUBSTRING
 @app.route('/longestCommonSubString', methods=['POST'])
