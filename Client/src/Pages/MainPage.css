@@ -109,6 +109,7 @@ button:disabled {
 .prefix-search-container {
     margin-top: 20px;
     width: 350px;
+    position: relative;
 }
 
 .suggestions-list {
@@ -120,6 +121,11 @@ button:disabled {
     background-color: #1c1c1c;
     max-height: 150px;
     overflow-y: auto;
+    overflow-y: auto; 
+    position: absolute; 
+    top: 100%; 
+    width: 100%; 
+    z-index: 100;
 }
 
 .suggestions-list li {
