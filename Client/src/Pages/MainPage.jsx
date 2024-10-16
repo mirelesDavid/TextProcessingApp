@@ -11,8 +11,19 @@ const MainPage = () => {
   const [positions, setPositions] = useState([]);
   const [currentPositionIndex, setCurrentPositionIndex] = useState(0);
   const [prefix, setPrefix] = useState('');  
-  const [suggestions, setSuggestions] = useState([]);  
+  const [suggestions, setSuggestions] = useState([]);
 
+  // Función para resetear el Trie
+  const resetTrie = async () => {
+    try {
+      await axiosInstance.post('/resetTrie');
+      console.log('Trie reseteado');
+    } catch (error) {
+      console.error('Error reseteando el Trie:', error);
+    }
+  };
+
+  // Función para manejar la carga de archivos
   const handleFileUpload = (event, setFileContent, setOriginalContent) => {
     const file = event.target.files[0];
     if (file) {
@@ -23,6 +34,9 @@ const MainPage = () => {
         setOriginalContent(content);
 
         try {
+          // Resetea el Trie antes de insertar el nuevo texto
+          await resetTrie();
+          
           await axiosInstance.post('/insertText', { text: content });
           console.log("Words inserted into Trie");
         } catch (error) {
@@ -51,13 +65,13 @@ const MainPage = () => {
     }
   };
 
-  const highlightSubstring = (text, ranges) => {
+  const highlightSubstring = (text, ranges, color) => {
     let highlightedText = '';
     let lastIndex = 0;
 
     ranges.forEach(({ start, end }) => {
       highlightedText += text.slice(lastIndex, start);
-      highlightedText += `<span class="highlight">${text.slice(start, end + 1)}</span>`;
+      highlightedText += `<span class="highlight" style="background-color: ${color};">${text.slice(start, end + 1)}</span>`;
       lastIndex = end + 1;
     });
 
@@ -72,7 +86,7 @@ const MainPage = () => {
       setPositions(positions);
       setCurrentPositionIndex(0);
       if (positions.length > 0) {
-        const highlightedText = highlightSubstring(fileContent1, [{ start: positions[0], end: positions[0] + pattern.length - 1 }]);
+        const highlightedText = highlightSubstring(fileContent1, [{ start: positions[0], end: positions[0] + pattern.length - 1 }], '#FFFF00'); // Amarillo
         setFileContent1(highlightedText);
       }
     } catch (error) {
@@ -83,7 +97,7 @@ const MainPage = () => {
   const nextMatch = () => {
     if (positions.length > 0) {
       const nextIndex = (currentPositionIndex + 1) % positions.length;
-      const highlightedText = highlightSubstring(originalContent1, [{ start: positions[nextIndex], end: positions[nextIndex] + pattern.length - 1 }]);
+      const highlightedText = highlightSubstring(originalContent1, [{ start: positions[nextIndex], end: positions[nextIndex] + pattern.length - 1 }], '#FFFF00'); // Amarillo
       setFileContent1(highlightedText);
       setCurrentPositionIndex(nextIndex);
     }
@@ -92,7 +106,7 @@ const MainPage = () => {
   const prevMatch = () => {
     if (positions.length > 0) {
       const prevIndex = (currentPositionIndex - 1 + positions.length) % positions.length;
-      const highlightedText = highlightSubstring(originalContent1, [{ start: positions[prevIndex], end: positions[prevIndex] + pattern.length - 1 }]);
+      const highlightedText = highlightSubstring(originalContent1, [{ start: positions[prevIndex], end: positions[prevIndex] + pattern.length - 1 }], '#FFFF00'); // Amarillo
       setFileContent1(highlightedText);
       setCurrentPositionIndex(prevIndex);
     }
@@ -102,7 +116,7 @@ const MainPage = () => {
     try {
       const response = await axiosInstance.post('/manacher', { text: fileContent1 });
       const { startIndex, endIndex } = response.data;
-      const highlightedText = highlightSubstring(fileContent1, [{ start: startIndex, end: endIndex }]);
+      const highlightedText = highlightSubstring(fileContent1, [{ start: startIndex, end: endIndex }], '#00FF00'); // Verde
       setFileContent1(highlightedText);
     } catch (error) {
       console.error('Error running Manacher:', error);
@@ -115,8 +129,8 @@ const MainPage = () => {
       const { substringCoordinates1, substringCoordinates2 } = response.data;
 
       if (substringCoordinates1 && substringCoordinates2) {
-        const highlightedText1 = highlightSubstring(fileContent1, substringCoordinates1);
-        const highlightedText2 = highlightSubstring(fileContent2, substringCoordinates2);
+        const highlightedText1 = highlightSubstring(fileContent1, substringCoordinates1, '#0000FF'); // Azul
+        const highlightedText2 = highlightSubstring(fileContent2, substringCoordinates2, '#0000FF'); // Azul
         
         setFileContent1(highlightedText1);
         setFileContent2(highlightedText2);

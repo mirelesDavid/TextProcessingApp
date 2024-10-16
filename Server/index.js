@@ -88,6 +88,20 @@ app.post("/longestCommonSubString", async (req, res) => {
     }
 });
 
+app.post("/resetTrie", async (req, res) => {
+    try {
+        console.log('Reiniciando el Trie en el backend');
+        // Llama al backend de Flask para vaciar el Trie
+        await axios.post('http://127.0.0.1:5000/resetTrie');
+        res.json({ message: 'Trie reseteado' });
+    } catch (error) {
+        console.error('Error al resetear el Trie:', error);
+        res.status(500).json({ message: 'Error al resetear el Trie' });
+    }
+});
+
+
+
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);

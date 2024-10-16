@@ -6,7 +6,10 @@ from trieAlg import Trie
 
 app = Flask(__name__)
 
-#Z ALG
+# Instancia global de Trie
+trie = Trie()
+
+# Z ALG
 @app.route('/zAlg', methods=['POST'])
 def zAlg():
     try:
@@ -19,8 +22,7 @@ def zAlg():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-#TRIE ALG
-trie = Trie()
+# TRIE ALG - Insert text into Trie
 @app.route('/insertText', methods=['POST'])
 def insert_text():
     try:
@@ -38,6 +40,7 @@ def insert_text():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# TRIE ALG - Get suggestions based on prefix
 @app.route('/trieAlg', methods=['POST'])
 def trie_alg():
     try:
@@ -48,7 +51,14 @@ def trie_alg():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-#MANACHER
+# NUEVO: Resetear el Trie
+@app.route('/resetTrie', methods=['POST'])
+def reset_trie():
+    global trie
+    trie = Trie()  # Reinicializa el Trie
+    return jsonify({"message": "Trie reseteado correctamente"})
+
+# MANACHER
 @app.route('/manchesterAlg', methods=['POST'])
 def manchester_alg():
     try:
@@ -61,8 +71,7 @@ def manchester_alg():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-#LONGEST COMMON SUBSTRING
+# LONGEST COMMON SUBSTRING
 @app.route('/longestCommonSubString', methods=['POST'])
 def longestCommonSubStringAlg():
     try:
