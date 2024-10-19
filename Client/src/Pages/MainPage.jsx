@@ -24,7 +24,7 @@ const MainPage = () => {
   };
 
   // Función para manejar la carga de archivos
-  const handleFileUpload = (event, setFileContent, setOriginalContent) => {
+  const handleFileUpload = (event, setFileContent, setOriginalContent, isForTrie = false) => {
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
@@ -33,14 +33,15 @@ const MainPage = () => {
         setFileContent(content);
         setOriginalContent(content);
 
-        try {
-          // Resetea el Trie antes de insertar el nuevo texto
-          await resetTrie();
-          
-          await axiosInstance.post('/insertText', { text: content });
-          console.log("Words inserted into Trie");
-        } catch (error) {
-          console.error('Error inserting text:', error);
+        if (isForTrie) {
+          try {
+            // Resetea el Trie antes de insertar el nuevo texto solo si es para textbox1
+            await resetTrie();
+            await axiosInstance.post('/insertText', { text: content });
+            console.log("Words inserted into Trie");
+          } catch (error) {
+            console.error('Error inserting text:', error);
+          }
         }
       };
       reader.readAsText(file);
@@ -159,7 +160,7 @@ const MainPage = () => {
           <input
             type="file"
             accept=".txt"
-            onChange={(e) => handleFileUpload(e, setFileContent1, setOriginalContent1)}
+            onChange={(e) => handleFileUpload(e, setFileContent1, setOriginalContent1, true)} // Solo se inserta en el Trie para textbox1
           />
         </div>
 
@@ -173,7 +174,7 @@ const MainPage = () => {
           <input
             type="file"
             accept=".txt"
-            onChange={(e) => handleFileUpload(e, setFileContent2, setOriginalContent2)}
+            onChange={(e) => handleFileUpload(e, setFileContent2, setOriginalContent2, false)} // No inserta en el Trie para textbox2
           />
         </div>
       </div>
